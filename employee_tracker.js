@@ -312,7 +312,66 @@ function allEmployees(){
 };
 
 function updateEmployee(){
-
+    const querySQL = "SELECT * FROM employee"
+    connection.query(querySQL, function(err, data){
+        if(err) throw err;
+        let employees = [];
+        for (let i = 0; i < data.length; i++){
+            employees.push(`${data[i].first_name} ${data[i].last_name}`)
+        };
+        console.log("this is data");
+        console.log(data)
+        inquirer.prompt(
+            [
+                {
+                    type: "list",
+                    message: "Select employee who's role has changed:",
+                    name: "roleChange",
+                    choices: employees
+                }
+            ]
+        ).then(function(res){
+            let employeeID = "";
+            for(let i = 0; i < data.length; i++){
+                if(res.roleChange = `${data[i].first_name} ${data[i].last_name}`){
+                     employeeID = data[i].id
+                     break;
+                };
+            };
+            const queryRole = "SELECT * FROM role"
+            connection.query(queryRole, function(err, data_1){
+                if(err) throw err;
+                let titles = [];
+                for (let i = 0; i < data_1.length; i++){
+                    titles.push(data_1[i].title);
+                };
+                inquirer.prompt(
+                    [
+                        {
+                            type: "list",
+                            message: "Select employee new role:",
+                            name: "newRole",
+                            choices: titles
+                        }
+                    ]
+                ).then(function(res){
+                    let roleID = "";
+                    for (let i = 0; i < data_1.length; i++){
+                        if (res.newRole === data_1[i].title){
+                            roleID = data_1[i].id;
+                            break;
+                        }
+                    };
+                    const query = "UPDATE employee SET role_id = ? WHERE id = ?;"
+                    connection.query(query,[roleID, employeeID], function(err, data_2){
+                        if (err) throw err;
+                        console.log("Title Successfully changed!");
+                        company_directory()
+                    })
+                });
+            });  
+        });
+    });
 }
 
 
