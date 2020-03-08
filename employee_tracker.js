@@ -29,9 +29,9 @@ function company_directory() {
                     'Add a department?',
                     'Add a role?',
                     'Add an employee?',
-                    'View a department?',
-                    'View a role?',
-                    'View employees?',
+                    'View employee by department?',
+                    'View employee by role?',
+                    'View all employees?',
                     'Update employee role?'
                     //'Update employee manager?'
                     //'View employees by manager?'
@@ -47,75 +47,24 @@ function company_directory() {
             case "Add a department?":
                 add_department();
                 break;
-
             case 'Add a role?':
                 add_role();
                 break;
-                
             case 'Add an employee?':
                 add_employee();
                 break;
-            case 'View a department?':
-                inquirer.prompt(
-                    [
-                        {
-                            type: 'rawlist',
-                            message: 'What department would you like to view?',
-                            name: 'department',
-                            choices: department_list()
-                        }
-                    ]
-                ).then(function(res) {
-                    //Add function to add department to database 
-                    console.log(res); 
-                    view_department(res.department);
-                    
-                });
+            case 'View employee by department?':
+                byDepartment();
                 break;
-            case 'View a role?':
-                inquirer.prompt(
-                    [
-                        {
-                            type: 'rawlist',
-                            message: 'What role would you like to view?',
-                            name: 'role',
-                            choices: role_list()
-                        }
-                    ]
-                ).then(function(res) {
-                    //Add function to add department to database 
-                    console.log(res); 
-                    view_role(res.role);
-                
-                });
+            case 'View employee by role?':
+                byRole("role");
                 break;
-            case 'View employees':
-                inquirer.prompt(
-                    [
-                        {
-                            type: 'rawlist',
-                            message: 'What employee would you like to view?',
-                            name: 'employee',
-                            choices: employee_list()
-                        }
-                    ]
-                ).then(function(res) {
-                    //Add function to add department to database  
-                    console.log(res);
-                    view_employee(res.employee);
-                    
-                });
+            case 'View all employees?':
+                allEmployees();
                 break;
-            // case 'Update employee role':
-            //     inquirer.prompt(
-            //         [
-            //             {
-            //                 type: "list"
-
-            //             }
-            //         ]
-            //     )
-            //     break;
+            case 'Update employee role?':
+                updateEmployee();
+                break;
         };
         
     })
@@ -171,7 +120,7 @@ function add_role(){
                 },
                 {
                     type: 'list',
-                    message: 'What is the salary for this role?',
+                    message: 'Which department does this role work for?',
                     name: 'dep_list',
                     choices: departments
                 }
@@ -199,7 +148,7 @@ function add_role(){
 };  
 
 function add_employee(){
-    //This function will add role to database.
+    //This function will add employee to database.
     const queryRole = "SELECT * FROM role"
     
     connection.query(queryRole, function(err, role_data){
@@ -269,23 +218,102 @@ function add_employee(){
     });
 };  
 
-function role_list(){
-    //This function will get list of available roles (titles).
+function byDepartment(){
+    //This function will get list of employees by department.
+    const queryDep = "SELECT * FROM department"
+    
+    connection.query(queryDep, function(err,data){
+        if (err) throw err;
+        const departments = [];
+      
+        for(let i = 0; i < data.length; i++){
+            departments.push(data[i].name);
+        };
+
+        inquirer.prompt(
+            [
+                {
+                    type: 'list',
+                    message: 'Which department would you like to view?',
+                    name: 'dep_list',
+                    choices: departments
+                }
+            ]
+        ).then(function(res) {
+
+            let joinTables = "SELECT employee.id, first_name, last_name, title, department.name, manager ";
+            joinTables += "FROM employee INNER JOIN role ";
+            joinTables += "ON employee.role_id = role.id ";
+            joinTables += "INNER JOIN department ";
+            joinTables += "ON role.department_id = department.id ";
+            joinTables += "WHERE department.name = ? ";
+            joinTables += "ORDER BY employee.id";
+            connection.query(joinTables,[res.dep_list], function(err, data){
+                if(err) throw err;
+                console.table(data);
+                company_directory();
+            });
+        });
+    });
 };
 
-function view_role(title){
-    //This function will return the role selected 
+function byRole(){
+    //This function will get list of employees by role (titles).
+    const queryRole = "SELECT * FROM role"
+    
+    connection.query(queryRole, function(err, data){
+        if (err) throw err;
+        const titles = [];
+      
+        for(let i = 0; i < data.length; i++){
+            titles.push(data[i].title);
+        };
+        inquirer.prompt(
+            [
+                {
+                    type: 'rawlist',
+                    message: 'Which role would you like to view?',
+                    name: 'title',
+                    choices: titles
+                }
+            ]
+        ).then(function(res) {
+
+            let joinTables = "SELECT employee.id, first_name, last_name, title, department.name, manager ";
+            joinTables += "FROM employee INNER JOIN role ";
+            joinTables += "ON employee.role_id = role.id ";
+            joinTables += "INNER JOIN department ";
+            joinTables += "ON role.department_id = department.id ";
+            joinTables += "WHERE role.title = ? ";
+            joinTables += "ORDER BY employee.id";
+            connection.query(joinTables,[res.title], function(err, data){
+                if(err) throw err;
+                console.table(data);
+                company_directory();
+            });
+        });
+    });
+};
+
+function allEmployees(){
+    //This function will get list of all employees.
+
+    let joinTables = "SELECT employee.id, first_name, last_name, title, department.name, manager ";
+    joinTables += "FROM employee INNER JOIN role ";
+    joinTables += "ON employee.role_id = role.id ";
+    joinTables += "INNER JOIN department ";
+    joinTables += "ON role.department_id = department.id ";
+    joinTables += "ORDER BY employee.id";
+    connection.query(joinTables, function(err, data){
+        if(err) throw err;
+        console.table(data);
+        company_directory();
+    });
+};
+
+function updateEmployee(){
+
 }
-
-// ------ Manager related Functions--------
-function manager_list(){
-    //This function will get the list of available managers
-};
-
-// ------ Employee related Functions--------
-function employee_list(){
-    //This function will get the list of available managers
-};
 
 
 company_directory();

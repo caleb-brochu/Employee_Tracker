@@ -1,3 +1,5 @@
+DROP DATABASE company;
+
 CREATE DATABASE  company;
 
 USE company;
@@ -17,12 +19,22 @@ CREATE TABLE role(
     FOREIGN KEY(department_id) REFERENCES department(id)
 );
 
-CREATE TABLE employee (
+CREATE TABLE employee(
     id INT AUTO_INCREMENT NOT NULL,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     PRIMARY KEY(id),
     role_id INT(20) NOT NULL,
     FOREIGN KEY(role_id) REFERENCES role(id),
-    manager_id INT(10)
+    manager VARCHAR(50)
 );
+
+
+
+SELECT employee.id, first_name, last_name, title, department.name, manager
+FROM employee INNER JOIN role 
+ON employee.role_id = role.id
+INNER JOIN department 
+ON role.department_id = department.id
+WHERE department.name = "Sales"
+ORDER BY employee.id;
