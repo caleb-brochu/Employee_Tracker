@@ -1,0 +1,25 @@
+{
+  "name": "employee_tracker",
+  "version": "1.0.0",
+  "description": "Employee Tracking App",
+  "main": "employee_tracker.js",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "mysql": "^2.18.1",
+    "inquirer": "^7.0.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caleb-brochu/Employee_Tracker.git"
+  },
+  "author": "CBrochu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caleb-brochu/Employee_Tracker/issues"
+  },
+  "homepage": "https://github.com/caleb-brochu/Employee_Tracker#readme"
+}
